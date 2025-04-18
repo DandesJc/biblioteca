@@ -4,54 +4,63 @@ import { Prestamo } from 'src/models/prestamo.entity';
 import { Repository } from 'typeorm';
 import { CreatePrestamoDto } from 'src/dtos/prestamo/create-prestamo.dto';
 import { Usuario } from 'src/models/usuario.entity';
-
+import { Material } from 'src/models/material.entity';
 
 @Injectable()
 export class MovimientoService {
   constructor(
-        @InjectRepository(Prestamo)
-        private readonly prestamoRepository: Repository<Prestamo>,
-      ){}
-      
-    async createPrestamo(prestamo:CreatePrestamoDto): Promise<Prestamo> {
-        const prestamoDato = await this.prestamoRepository.create(prestamo);
-        return this.prestamoRepository.save(prestamoDato);
+    @InjectRepository(Prestamo)
+    private readonly prestamoRepository: Repository<Prestamo>,
+
+    @InjectRepository(Material)
+    private readonly materialRepository: Repository<Material>,
+  ) {}
+
+  async createPrestamo(prestamo: CreatePrestamoDto): Promise<Prestamo> {
+    const material = await this.materialRepository.findOneBy({identificador: prestamo.fk_material });
+
+    if (!material || material.cantidad_actual <= 0) {
+      throw new HttpException("Material no disponible para préstamo", 400);
     }
 
-    async findPrestamos(): Promise<Prestamo[]> { 
+    const prestamoDato = this.prestamoRepository.create(prestamo);
+    await this.prestamoRepository.save(prestamoDato);
 
-        return await this.prestamoRepository.find();
+    material.cantidad_actual -= 1;
+    await this.materialRepository.save(material);
 
+    return prestamoDato;
+  }
+
+  async findPrestamos(): Promise<Prestamo[]> {
+    return await this.prestamoRepository.find();
+  }
+
+  async contarPrestamos(fk_usuario: string): Promise<number> {
+    return await this.prestamoRepository.countBy({ fk_usuario: fk_usuario });
+  }
+
+  async findOnePrestamo(fk_usuario: string, fk_material: string): Promise<Prestamo | null> {
+    const prestamoDato = await this.prestamoRepository.findOneBy({
+      fk_usuario: fk_usuario,
+    });
+
+    if (!prestamoDato) {
+      throw new HttpException("Prestamo Not Found", 404);
+    }
+    return prestamoDato;
+  }
+
+  async removePrestamo(fk_usuario: string, fk_material: string) {
+    const result = await this.prestamoRepository.delete({ fk_usuario, fk_material });
+
+    const material = await this.materialRepository.findOneBy({ identificador: fk_material });
+    if (material) {
+      material.cantidad_actual += 1;
+      await this.materialRepository.save(material);
     }
 
-
-    async contarPrestamos(fk_usuario: string): Promise<number> { 
-
-        return await this.prestamoRepository.countBy({fk_usuario:fk_usuario});
-
-    }
-
-    async findOnePrestamo(fk_usuario: string, fk_material: string): Promise<Prestamo | null> { 
-        const prestamoDato = await this.prestamoRepository.findOneBy(
-            {fk_usuario: fk_usuario,
-             //fk_material: fk_material
-            });
-
-
-        if(!prestamoDato) {
-            throw new HttpException(
-                "Prestamo Not Found",
-                404,
-            )
-        }
-        return prestamoDato;
-    }
-
-
-    async removePrestamo(fk_usuario: string, fk_material: string) { 
-        //const prestamoExistente = await this.findOnePrestamo(fk_usuario, fk_material);
-        const prestamoDato = await this.prestamoRepository.delete({fk_usuario, fk_material});
-        console.log(prestamoDato)
-    }
-
+    return result;
+  }
 }
+

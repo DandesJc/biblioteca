@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { CreateUsuarioDto } from 'src/dtos/usuario/create-usuario.dto';
 import { UsuarioService } from './usuario.service';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 // import { UsuarioService } from './usuario.service';
 // import { CreateUsuarioDto } from './dto/create-usuario.dto';
 // import { UpdateUsuarioDto } from './dto/update-usuario.dto';
@@ -12,6 +13,8 @@ export class UsuarioController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Crear usuario' })
+  @ApiResponse({ status: 201, description: 'Prestamo registrado correctamente' })
   async create(@Body() usuario: CreateUsuarioDto) {
     try {
       await this.usuarioServicio.create(usuario);
@@ -29,6 +32,7 @@ export class UsuarioController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Listar todo los usuarios' })
   async findAll() {
     try {
       const usuarios = await this.usuarioServicio.findAll();
@@ -43,6 +47,7 @@ export class UsuarioController {
   }
 
   @Get(':cedula')
+  @ApiOperation({ summary: 'Listar usuario por cedula' })
   async findOne(@Param('cedula') cedula: string) {
     try {
       const usuario = await this.usuarioServicio.findOne(cedula);
@@ -64,6 +69,7 @@ export class UsuarioController {
   }
 
   @Delete(':cedula')
+  @ApiOperation({ summary: 'Eliminar usuario por cedula' })
   async remove(@Param('cedula') cedula: string) {
     try {
       const usuario = await this.usuarioServicio.remove(cedula);

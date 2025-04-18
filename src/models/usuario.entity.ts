@@ -10,6 +10,6 @@ export class Usuario {
     nombre: string;
 
     //@ManyToOne(type => Roles)
-    @Column()
+    @Column({ type: 'varchar', nullable: true })
     rol: string
 }

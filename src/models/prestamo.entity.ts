@@ -8,10 +8,10 @@ export class Prestamo {
     @PrimaryGeneratedColumn("increment")
     id: number
 
-    @ManyToOne(material => Material)
+    @ManyToOne(() => Material)
     fk_material: string
     
-    @ManyToOne(usuario => Usuario)
+    @ManyToOne(() => Usuario)
     fk_usuario: string
 
 }

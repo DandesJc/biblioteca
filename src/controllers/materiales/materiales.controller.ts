@@ -1,7 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { MaterialesService } from './materiales.service';
 import { CreateMaterialDto } from 'src/dtos/material/create-material.dto';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Usuarios')
 @Controller('material')
 export class MaterialesController {
  constructor(
@@ -9,6 +11,8 @@ export class MaterialesController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Crear material' })
+  @ApiResponse({ status: 201, description: 'Usuario creado correctamente' })
   async create(@Body() material: CreateMaterialDto) {
     try {
       await this.materialServicio.create(material);
@@ -26,6 +30,7 @@ export class MaterialesController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Lista todos los materiales' })
   async findAll() {
     try {
       const material = await this.materialServicio.findAll();
@@ -40,6 +45,7 @@ export class MaterialesController {
   }
 
   @Get(':identificador')
+  @ApiOperation({ summary: 'Lista un material' })
   async findOne(@Param('identificador') identificador: string) {
     try {
       const material = await this.materialServicio.findOne(identificador);
@@ -56,11 +62,13 @@ export class MaterialesController {
   }
 
   @Patch(':identificador')
+  @ApiOperation({ summary: 'Lista un actualiza un material' })
   update(@Param('identificador') identificador: string, @Body() body)  {
     return "update";
   }
 
   @Delete(':identificador')
+  @ApiOperation({ summary: 'Lista un actualiza un material' })
   async remove(@Param('identificador') identificador: string) {
     try {
       const material = await this.materialServicio.remove(identificador);

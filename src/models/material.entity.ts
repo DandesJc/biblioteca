@@ -13,8 +13,8 @@ export class Material {
     fecha_de_regitro: Date
 
     @Column()
-    cantidad_registrada: Number
+    cantidad_registrada: number
 
     @Column()
-    cantidad_actual: Number
+    cantidad_actual: number
 }
